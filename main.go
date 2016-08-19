@@ -29,7 +29,6 @@ func main() {
 		duration := test(url, keepalive, username, password, topic)
 		c1 <- duration
 	}()
-	//c1 := test(url, keepalive, username, password, topic)
 	select {
 	case res := <-c1:
 		millis := (res.Seconds()*1000)
@@ -37,26 +36,24 @@ func main() {
 	case <-time.After(time.Second * 5):
 		fmt.Println("-1")
 	}
+
 }
 
 func test(url string, keepalive string, username string, password string, topic string) time.Duration {
 	var start time.Time
 	start = time.Now()
 
-	var duration time.Duration
-	duration = -1
-
-	//var brokerUrl = strings.Join([]string{"tcp://", host, ":", port}, "")
 	var brokerUrl = url
 
 	//create a ClientOptions struct setting the broker address, clientid, turn
 	//off trace output and set the default message handler
 	opts := MQTT.NewClientOptions().AddBroker(brokerUrl)
 	opts.SetClientID("mqtt-tester")
+	opts.SetConnectTimeout(time.Duration(1 * time.Second))
 
-	durationChan := make(chan time.Duration, 1)
+	durationChannel := make(chan time.Duration, 1)
 	opts.SetDefaultPublishHandler(func(client MQTT.Client, msg MQTT.Message) {
-		durationChan <- time.Since(start)
+		durationChannel <- time.Since(start)
 	})
 	if username != "" && password != "" {
 		opts.SetUsername(username)
@@ -73,28 +70,19 @@ func test(url string, keepalive string, username string, password string, topic 
 	//create and start a client using the above ClientOptions
 	c := MQTT.NewClient(opts)
 	if token := c.Connect(); token.Wait() && token.Error() != nil {
-		durationChan <- time.Duration(-1)
+		durationChannel <- time.Duration(-1)
 	}
+	defer c.Disconnect(250)
 
 	//subscribe to the topic /go-mqtt/sample and request messages to be delivered
 	//at a maximum qos of zero, wait for the receipt to confirm the subscription
 	if token := c.Subscribe(topic, 0, nil); token.Wait() && token.Error() != nil {
-		durationChan <- time.Duration(-1)
+		durationChannel <- time.Duration(-1)
 	}
-	token := c.Publish(topic, 0, false, "check msg")
-	token.Wait()
+	defer c.Unsubscribe(topic);
 
-	duration = <-durationChan
-
-	//unsubscribe
-	if token := c.Unsubscribe(topic); token.Wait() && token.Error() != nil {
-		//fmt.Println("-1")
-		//os.Exit(0)
-		//durationMillis = -1
-		durationChan <- time.Duration(-1)
+	if token := c.Publish(topic, 0, false, "check msg"); token.Wait() && token.Error() != nil {
+		durationChannel <- time.Duration(-1)
 	}
-
-	defer c.Disconnect(250)
-
-	return duration
+	return <- durationChannel
 }
