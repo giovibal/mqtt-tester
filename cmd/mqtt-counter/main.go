@@ -22,17 +22,15 @@ func main() {
 	flag.StringVar(&topic, "topic", "mqtt-tester", "mqtt topic")
 	flag.Parse()
 
-	// TIMEOUT 5 sec
-	duration := make(chan time.Duration, 1)
+	// TIMEOUT 10 sec
+	count := make(chan int64, 1)
 	go func() {
-		duration <- tests.TracePublishDuration(url, keepalive, username, password, topic)
+		count <- tests.CountMessages(url, keepalive, username, password, topic, 1 * time.Second)
 	}()
 	select {
-	case ret := <-duration:
-		millis := (ret.Seconds() * 1000)
-		fmt.Printf("%.0f\n", millis)
-	case <-time.After(time.Second * 5):
-		fmt.Println("-1")
+	case ret := <-count:
+		fmt.Println(ret)
+	case <-time.After(10 * time.Second):
+		fmt.Println("0")
 	}
-
 }
