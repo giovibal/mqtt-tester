@@ -68,7 +68,9 @@ func CountMessages(url string, keepalive string, username string, password strin
 	opts.SetConnectTimeout(time.Duration(1 * time.Second))
 
 	opts.SetDefaultPublishHandler(func(client MQTT.Client, msg MQTT.Message) {
-		count = atomic.AddInt64(&count, 1)
+		if !msg.Retained() {
+			count = atomic.AddInt64(&count, 1)
+		}
 	})
 	if username != "" && password != "" {
 		opts.SetUsername(username)
