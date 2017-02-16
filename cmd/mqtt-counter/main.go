@@ -26,9 +26,8 @@ func main() {
 	flag.Parse()
 
 	// TIMEOUT 10 sec
-	count := make(chan int64, 1)
+	count := make(chan int64)
 	go func() {
-		//count <- tests.CountMessages(url, keepalive, username, password, topic, 1 * time.Second)
 		count <- tests.CountMessages(url, keepalive, username, password, topic, *interval)
 	}()
 	select {
