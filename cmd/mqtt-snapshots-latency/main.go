@@ -31,10 +31,15 @@ func main() {
 
 	err := tests.TraceSnapshotVsReceivedTimestamp(url, keepalive, username, password, topic,
 		func(topic string, uri string, creationTime time.Time, receivedTime time.Time) {
-			duration := creationTime.Sub(receivedTime)
-			//traceEvent(duration, creationTime, receivedTime, topic, uri);
+			var duration time.Duration
+			if receivedTime.After(creationTime) {
+				duration = receivedTime.Sub(creationTime)
+			} else {
+				duration = creationTime.Sub(receivedTime)
+			}
+
 			if duration > threshold {
-				traceEvent(duration, creationTime, receivedTime, topic, uri);
+				traceEvent(duration, creationTime, receivedTime, topic, uri)
 			}
 		})
 	if err!=nil {
@@ -51,6 +56,6 @@ func main() {
 }
 
 func traceEvent(duration time.Duration, creationTime time.Time, receivedTime time.Time,  topic string, uri string) {
-	fmt.Printf("ALERT - Received after %v seconds (%v,%v) on topic %v (uri %v)\n",
+	fmt.Printf("ALERT - Received after %v seconds (Creation date: %v -> Received date: %v) on topic %v (uri %v)\n",
 		duration.Seconds(), creationTime, receivedTime, topic, uri)
 }
