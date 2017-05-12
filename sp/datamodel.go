@@ -1,9 +1,9 @@
 package sp
 
 import (
-	"log"
 	"encoding/json"
 	"fmt"
+	"log"
 	"time"
 )
 
@@ -88,4 +88,3 @@ func (s *Snapshot) SetTimestamp(ts time.Time) {
 		s.R[i].Tz = s.Tz
 	}
 }
-

@@ -2,12 +2,12 @@ package main
 
 import (
 	"flag"
-	"github.com/GruppoFilippetti/mqtt-tester/tests"
-	"time"
-	"os"
-	"syscall"
 	"fmt"
+	"github.com/GruppoFilippetti/mqtt-tester/tests"
+	"os"
 	"os/signal"
+	"syscall"
+	"time"
 )
 
 func main() {
@@ -24,8 +24,8 @@ func main() {
 	flag.StringVar(&username, "username", "", "username")
 	flag.StringVar(&password, "password", "", "password")
 	flag.StringVar(&topic, "topic", "#", "mqtt topic")
-	flag.DurationVar(&threshold, "threshold", 1*time.Second, "duration in seconds. " +
-		"Es. '300ms', '-1.5h' or '2h45m'). " +
+	flag.DurationVar(&threshold, "threshold", 1*time.Second, "duration in seconds. "+
+		"Es. '300ms', '-1.5h' or '2h45m'). "+
 		"Valid time units are 'ns', 'us' (or 'µs'), 'ms', 's', 'm', 'h'.")
 	flag.Parse()
 
@@ -42,7 +42,7 @@ func main() {
 				traceEvent(duration, creationTime, receivedTime, topic, uri)
 			}
 		})
-	if err!=nil {
+	if err != nil {
 		panic(err)
 	}
 	// capture ctrl+c
@@ -55,7 +55,7 @@ func main() {
 	}
 }
 
-func traceEvent(duration time.Duration, creationTime time.Time, receivedTime time.Time,  topic string, uri string) {
+func traceEvent(duration time.Duration, creationTime time.Time, receivedTime time.Time, topic string, uri string) {
 	fmt.Printf("ALERT - Received after %v seconds (Creation date: %v -> Received date: %v) on topic %v (uri %v)\n",
 		duration.Seconds(), creationTime, receivedTime, topic, uri)
 }

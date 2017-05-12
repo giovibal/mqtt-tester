@@ -1,10 +1,10 @@
 package tests
 
 import (
+	"github.com/GruppoFilippetti/mqtt-tester/sp"
 	MQTT "github.com/eclipse/paho.mqtt.golang"
 	"sync/atomic"
 	"time"
-	"github.com/GruppoFilippetti/mqtt-tester/sp"
 )
 
 func TracePublishDuration(url string, keepalive string, username string, password string, topic string) time.Duration {
